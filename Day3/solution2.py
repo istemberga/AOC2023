@@ -1,56 +1,73 @@
 import re
-from operator import mul
 
-with open('your input here', 'r') as f:
-    puzzle_input = f.read()
+regex = r"\d+"
+surrounding_size = 1  # Adjust this value to change the size of the square-like shape
 
+# Read the content of the text file
+file_path = r"your file path here"  # Replace with the actual path to your text file
+with open(file_path, 'r') as file:
+    file_content = file.read()
 
-def part1(puzzle_input):
+# Add \n to the end of each line
+formatted_content = "\n".join(file_content.splitlines())
 
-    lines = puzzle_input.split('\n')
+# Split the formatted_content into rows
+rows = formatted_content.strip().split('\n')
 
-    symbol_regex = r'[^.\d]'
-    symbol_adjacent = set()
-    for i, line in enumerate(lines):
-        for m in re.finditer(symbol_regex, line):
-            j = m.start()
-            symbol_adjacent |= {(r, c) for r in range(i-1, i+2) for c in range(j-1, j+2)}
+# Initialize an empty grid to store the positions and values
+grid = []
 
-    number_regex = r'\d+'
-    part_num_sum = 0
-    for i, line in enumerate(lines):
-        for m in re.finditer(number_regex, line):
-            if any((i, j) in symbol_adjacent for j in range(*m.span())):
-                part_num_sum += int(m.group())
+# Initialize a dictionary to store the found numbers with their coordinates
+found_numbers = {}
 
-    return part_num_sum
+# Save the position of the first asterisk
+asterisk_position = None
 
+# Loop through each row and convert it into a list of characters
+for row_num, row in enumerate(rows):
+    grid_row = list(row)
+    grid.append(grid_row)
 
-def part2(puzzle_input):
-    lines = puzzle_input.split('\n')
+# Use the regular expression to find matches in the grid
+for row_num, row in enumerate(grid):
+    col_num = 0
+    cell = "".join(row)
+    cell_matches = re.finditer(regex, cell)
+    for match in cell_matches:
+        start_col = col_num + match.start()
+        end_col = col_num + match.end() - 1
 
-    gear_regex = r'\*'
-    gears = dict()
-    for i, line in enumerate(lines):
-        for m in re.finditer(gear_regex, line):
-            gears[(i, m.start())] = []
+        # Check the characters in the surrounding square
+        asterisk_found = False
+        for i in range(max(0, row_num - surrounding_size), min(len(grid), row_num + surrounding_size + 1)):
+            for j in range(max(0, start_col - surrounding_size), min(len(cell), end_col + surrounding_size + 1)):
+                if grid[i][j] == '*':
+                    asterisk_found = True
+                    asterisk_position = (i, j)
+                    break
+            if asterisk_found:
+                break
 
-    number_regex = r'\d+'
-    for i, line in enumerate(lines):
-        for m in re.finditer(number_regex, line):
-            for r in range(i-1, i+2):
-                for c in range(m.start()-1, m.end()+1):
-                    if (r, c) in gears:
-                        gears[(r, c)].append(int(m.group()))
+        # If an asterisk is found, check if the number shares the same coordinates
+        if asterisk_found:
+            current_coordinates = asterisk_position
+            current_number = int(match.group())
 
-    gear_ratio_sum = 0
-    for nums in gears.values():
-        if len(nums) == 2:
-            gear_ratio_sum += mul(*nums)
+            # Check if the coordinates have been seen before
+            if current_coordinates in found_numbers:
+                found_numbers[current_coordinates].append(current_number)
+            else:
+                found_numbers[current_coordinates] = [current_number]
 
-    return gear_ratio_sum
+# Calculate the product of numbers associated with the same coordinates
+product_sum = 0
+for coordinates, numbers in found_numbers.items():
+    if len(numbers) > 1:
+        product = 1
+        for number in numbers:
+            product *= number
+        product_sum += product
+        print(f"Coordinates: {coordinates}, Numbers: {numbers}, Multiplied: {product}")
 
-
-
-print('Part 1:', part1(puzzle_input))
-print('Part 2:', part2(puzzle_input))
+# Print the sum of all multiplied numbers
+print("Sum of multiplied numbers:", product_sum)

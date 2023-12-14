@@ -4,7 +4,7 @@ regex = r"\d+"
 surrounding_size = 1  # Adjust this value to change the size of the square-like shape
 
 # Read the content of the text file
-file_path = r"C:\Users\Aleksandar\Desktop\AOC 2023\Day3\input.txt"  # Replace with the actual path to your text file
+file_path = r"your file path here"  # Replace with the actual path to your text file
 with open(file_path, 'r') as file:
     file_content = file.read()
 
