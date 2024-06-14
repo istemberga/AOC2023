@@ -1,7 +1,7 @@
 import re
 import sys
 
-file_path = "C:/Users/Aleksandar/Desktop/AoC/day2/input.txt"
+file_path = ""
 
 # Define patterns for green, red, and blue
 green_pattern = re.compile(r'(\d+)\s*green')
